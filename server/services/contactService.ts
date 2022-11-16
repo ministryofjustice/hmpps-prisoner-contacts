@@ -1,6 +1,9 @@
 import { convertToTitleCase } from '../utils/utils'
 import type HmppsAuthClient from '../data/hmppsAuthClient'
-import NomisPrisonerService, { Address, Context } from './nomisPrisonerService'
+import NomisPrisonerService, { PrisonApiAddress, Context } from './nomisPrisonerService'
+import { getAddress, getAddressUsage, getPhone } from '../utils/addressHelpers'
+
+const NOT_ENTERED = 'Not entered'
 
 interface UserDetails {
   name: string
@@ -35,19 +38,19 @@ interface RestrictionDto {
   comment?: string
 }
 
-interface TelephoneDto {
+export interface TelephoneDto {
   number: string
   type: string
   ext?: string
 }
 
-interface AddressUsageDto {
+export interface AddressUsageDto {
   addressUsage?: string
   addressUsageDescription?: string
   activeFlag: boolean
 }
 
-interface AddressDto {
+export interface AddressDto {
   addressType?: string
   flat?: string
   premise?: string
@@ -96,49 +99,66 @@ export default class ContactService {
 
     const offenderContacts = await Promise.all(
       // [...contacts.otherContacts, ...contacts.nextOfKin]
-      contacts.offenderContacts.map(async contact => {
-        const addresses: Address[] = await this.nomisPrisonerService.getPrisonerAddresses(context, contact.personId)
-        const rtn: ContactDto = {
-          firstName: contact.firstName,
-          lastName: contact.lastName,
-          contactType: contact.contactType,
-          contactTypeDescription: contact.contactTypeDescription,
-          relationshipCode: contact.relationship,
-          relationshipDescription: contact.relationshipDescription,
-          personId: contact.personId,
-          addresses: addresses.map(address => ({
-            ...address,
-            phones: [],
-            addressUsages: [],
-          })),
-          approvedVisitor: false,
-          emergencyContact: false,
-        }
-        return rtn
-      }),
+      contacts.offenderContacts
+        .filter(c => c.contactType === 'S')
+        .map(async contact => {
+          const addresses: PrisonApiAddress[] = await this.nomisPrisonerService.getPrisonerAddresses(
+            context,
+            contact.personId,
+          )
+          const rtn: ContactDto = {
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+            contactType: contact.contactType,
+            contactTypeDescription: contact.contactTypeDescription,
+            relationshipCode: contact.relationship,
+            relationshipDescription: contact.relationshipDescription,
+            personId: contact.personId,
+            addresses: addresses.map(address => ({
+              ...address,
+              phones: [],
+              addressUsages: [],
+            })),
+            approvedVisitor: false,
+            emergencyContact: false,
+          }
+          return rtn
+        }),
     )
 
     const toDisplayAddress = (addresses: AddressDto[]) => {
-      const a = addresses[0]
-      const address = `${a?.flat} ${a?.premise} ${a?.street} ${a?.locality} ${a?.town} ${a?.county}`
-      return { address, postcode: a?.postalCode, country: a?.country }
+      const a = addresses?.length && addresses[0]
+      return {
+        address: getAddress(a),
+        postcode: a?.postalCode || NOT_ENTERED,
+        country: a?.country || NOT_ENTERED,
+        landline: getPhone(a?.phones),
+        addressType: getAddressUsage(a),
+      }
+    }
+
+    const sortByName = (t1: ContactDto, t2: ContactDto): number => {
+      if (t1 && t2) {
+        if (t1.lastName !== t2.lastName) return t1.lastName.localeCompare(t2.lastName)
+        return t1.firstName.localeCompare(t2.firstName)
+      }
+      if (t1) return -1
+      if (t2) return 1
+      return 0
     }
 
     // Rough conversion to display-ready format
 
-    const displayContacts: DisplayContact[] = offenderContacts.map(contact => {
-      return {
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        contactTypeDescription: contact.contactTypeDescription,
-        relationshipDescription: contact.relationshipDescription,
-        phoneNumber: 'TODO',
-        email: 'TODO',
-        ...toDisplayAddress(contact.addresses),
-        landline: 'TODO',
-        addressType: 'TODO',
-      }
-    })
+    const displayContacts: DisplayContact[] = offenderContacts.sort(sortByName).map(contact => ({
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      contactTypeDescription: contact.contactTypeDescription,
+      relationshipDescription: contact.relationshipDescription,
+      email: 'test@todo.com',
+      ...toDisplayAddress(contact.addresses),
+      phoneNumber: '07888 123456',
+    }))
+
     return displayContacts
   }
 }

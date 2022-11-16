@@ -8,7 +8,7 @@ export interface Context {
   token?: string
 }
 
-export interface Contact {
+export interface PrisonApiContact {
   lastName: string
   firstName: string
   middleName: string
@@ -31,13 +31,13 @@ export interface Contact {
   createDateTime: string
 }
 
-export interface Contacts {
+interface Contacts {
   // bookingId: number
   // nextOfKin: Contact[]
-  offenderContacts: Contact[]
+  offenderContacts: PrisonApiContact[]
 }
 
-export interface Address {
+export interface PrisonApiAddress {
   addressType?: string
   flat?: string
   premise?: string
@@ -52,8 +52,24 @@ export interface Address {
   noFixedAddress: boolean
   startDate?: string
   endDate?: string
-  // TODO phones: TelephoneDto[]
-  // TODO addressUsages: AddressUsageDto[]
+  phones: PrisonApiTelephone[]
+  addressUsages: PrisonApiAddressUsage[]
+}
+
+export interface PrisonApiTelephone {
+  number: string
+  type: string
+  ext?: string
+}
+
+export interface PrisonApiAddressUsage {
+  addressUsage?: string
+  addressUsageDescription?: string
+  activeFlag?: boolean
+}
+
+export interface PrisonApiEmail {
+  email: string
 }
 
 export default class NomisPrisonerService {
@@ -65,25 +81,33 @@ export default class NomisPrisonerService {
 
   async getPrisonerContacts(context: Context, offenderNo: string): Promise<Contacts> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.info(`getting contact details for ${offenderNo}`)
+    logger.debug(`getting contact details for ${offenderNo}`)
     return NomisPrisonerService.restClient(token).get<Contacts>({
       path: `/api/offenders/${offenderNo}/contacts`,
     })
   }
 
-  async getPrisonerAddresses(context: Context, personId: number): Promise<Address[]> {
+  async getPrisonerAddresses(context: Context, personId: number): Promise<PrisonApiAddress[]> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.info(`getting contact details for ${personId}`)
-    return NomisPrisonerService.restClient(token).get<Address[]>({
+    logger.debug(`getting address details for ${personId}`)
+    return NomisPrisonerService.restClient(token).get<PrisonApiAddress[]>({
       path: `/api/persons/${personId}/addresses`,
     })
   }
+
+  async getPrisonerPhones(context: Context, personId: number): Promise<PrisonApiTelephone[]> {
+    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
+    logger.debug(`getting phone details for ${personId}`)
+    return NomisPrisonerService.restClient(token).get<PrisonApiTelephone[]>({
+      path: `/api/persons/${personId}/phones`,
+    })
+  }
+
+  async getPrisonerEmails(context: Context, personId: number): Promise<PrisonApiEmail[]> {
+    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
+    logger.debug(`getting email details for ${personId}`)
+    return NomisPrisonerService.restClient(token).get<PrisonApiEmail[]>({
+      path: `/api/persons/${personId}/emails`,
+    })
+  }
 }
-
-/*
- TODO:
-
-  const getPersonEmails = (context, personId) => get(context, `/api/persons/${personId}/emails`)
-
-  const getPersonPhones = (context, personId) => get(context, `/api/persons/${personId}/phones`)
- */
