@@ -57,6 +57,22 @@ export default {
       systemClientId: get('SYSTEM_CLIENT_ID', 'clientid', requiredInProduction),
       systemClientSecret: get('SYSTEM_CLIENT_SECRET', 'clientsecret', requiredInProduction),
     },
+    prisonApi: {
+      url: get('PRISON_API_URL', 'http://localhost:8102', requiredInProduction) as string,
+      timeout: {
+        response: Number(get('PRISON_API_TIMEOUT_RESPONSE', 60000)),
+        deadline: Number(get('PRISON_API_TIMEOUT_DEADLINE', 60000)),
+      },
+      agent: new AgentConfig(Number(get('PRISON_API_TIMEOUT_RESPONSE', 60000))),
+    },
+    prisonerSearchApi: {
+      url: get('PRISONER_SEARCH_API_URL', 'http://localhost:8103', requiredInProduction) as string,
+      timeout: {
+        response: Number(get('PRISONER_SEARCH_API_TIMEOUT_RESPONSE', 60000)),
+        deadline: Number(get('PRISONER_SEARCH_API_TIMEOUT_DEADLINE', 60000)),
+      },
+      agent: new AgentConfig(Number(get('PRISONER_SEARCH_API_TIMEOUT_RESPONSE', 60000))),
+    },
     tokenVerification: {
       url: get('TOKEN_VERIFICATION_API_URL', 'http://localhost:8100', requiredInProduction),
       timeout: {
@@ -66,6 +82,12 @@ export default {
       agent: new AgentConfig(Number(get('TOKEN_VERIFICATION_API_TIMEOUT_RESPONSE', 5000))),
       enabled: get('TOKEN_VERIFICATION_ENABLED', 'false') === 'true',
     },
+  },
+  applicationInsights: {
+    url: get('APPLICATION_INSIGHTS_URL', 'http://localhost:8103/applicationinsights'),
+    subscriptId: get('APPINSIGHTS_SUBSCRIPTION_ID', 'subscription', requiredInProduction),
+    component: get('APPINSIGHTS_COMPONENT', 'component', requiredInProduction),
+    resourceGroup: get('APPINSIGHTS_RESOURCE_GROUP', `${get('APPINSIGHTS_COMPONENT', 'component')}-rg`),
   },
   domain: get('INGRESS_URL', 'http://localhost:3000', requiredInProduction),
 }

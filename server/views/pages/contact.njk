@@ -1,0 +1,48 @@
+{% extends "../partials/layout.njk" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = applicationName + " - Other personal contacts" %}
+
+{% block content %}
+  {#  {{ govukBackLink({ text: "Back", href: '/' }) }} #}
+
+  <div class="govuk-grid-row govuk-body">
+    <h1 class="govuk-heading-l">{{ name }}'s other personal contacts</h1>
+
+    {% set cls = cycler("mid", "end") %}
+    <div class="govuk-grid-row">
+      {% for contact in displayContacts %}
+
+      <div class="govuk-grid-column-one-half">
+        <h2 class="govuk-heading-m govuk-!-margin-bottom-1">{{ contact.firstName }} {{ contact.lastName }}</h2>
+        <p class="govuk-body-m govuk-!-margin-top-0">{{ contact.relationshipDescription }}</p>
+        {% set rows = [
+          { key: { text: "Phone number" },  value: { text: contact.phoneNumber } },
+          { key: { text: "Email" },         value: { text: contact.email } },
+          { key: { text: "Main address" },  value: { text: contact.address } },
+          { key: { text: "Postcode" },      value: { text: contact.postcode } },
+          { key: { text: "Country" },       value: { text: contact.country } }
+        ] %}
+        {% if contact.landline %}
+          {% set rows = (rows.push({ key: { text: "Address phone" }, value: { text: contact.landline } }), rows) %}
+        {% endif %}
+        {% if contact.addressType %}
+          {% set rows = (rows.push({ key: { text: "Address type" },  value: { text: contact.addressType } }), rows) %}
+        {% endif %}
+        {{ govukSummaryList({
+          classes: '',
+          rows: rows
+        }) }}
+      </div>
+    {% if cls.next() == "end" %}
+    </div>
+    <div class="govuk-grid-row">
+      {% endif %}
+
+      {% endfor %}
+
+    </div>
+  </div>
+
+{% endblock %}

@@ -9,7 +9,7 @@ const isBlank = (str: string): boolean => !str || /^\s*$/.test(str)
  * @param name name to be converted.
  * @returns name converted to proper case.
  */
-const properCaseName = (name: string): string => (isBlank(name) ? '' : name.split('-').map(properCase).join('-'))
+export const properCaseName = (name: string): string => (isBlank(name) ? '' : name.split('-').map(properCase).join('-'))
 
 export const convertToTitleCase = (sentence: string): string =>
   isBlank(sentence) ? '' : sentence.split(' ').map(properCaseName).join(' ')
@@ -20,4 +20,10 @@ export const initialiseName = (fullName?: string): string | null => {
 
   const array = fullName.split(' ')
   return `${array[0][0]}. ${array.reverse()[0]}`
+}
+
+export const capitalize = (string: string): string => {
+  if (typeof string !== 'string') return ''
+  const lowerCase = string.toLowerCase()
+  return lowerCase.charAt(0).toUpperCase() + lowerCase.slice(1)
 }
