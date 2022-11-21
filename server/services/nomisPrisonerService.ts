@@ -3,73 +3,18 @@ import config from '../config'
 import logger from '../../logger'
 import type HmppsAuthClient from '../data/hmppsAuthClient'
 
+import { components } from '../@types/nomisPrisonerImport'
+
+export type PrisonApiContact = components['schemas']['OffenderContact']
+export type PrisonApiContacts = components['schemas']['OffenderContacts']
+export type PrisonApiAddress = components['schemas']['AddressDto']
+export type PrisonApiTelephone = components['schemas']['Telephone']
+export type PrisonApiAddressUsage = components['schemas']['AddressUsageDto']
+export type PrisonApiEmail = components['schemas']['Email']
+
 export interface Context {
   username?: string
   token?: string
-}
-
-export interface PrisonApiContact {
-  lastName: string
-  firstName: string
-  middleName: string
-  contactType: string
-  contactTypeDescription: string
-  relationship: string
-  relationshipDescription: string
-  commentText: string
-  emergencyContact: true
-  nextOfKin: false
-  relationshipId: number
-  personId: number
-  activeFlag: true
-  expiryDate: string
-  approvedVisitorFlag: true
-  canBeContactedFlag: false
-  awareOfChargesFlag: true
-  contactRootOffenderId: number
-  bookingId: number
-  createDateTime: string
-}
-
-interface Contacts {
-  // bookingId: number
-  // nextOfKin: Contact[]
-  offenderContacts: PrisonApiContact[]
-}
-
-export interface PrisonApiAddress {
-  addressType?: string
-  flat?: string
-  premise?: string
-  street?: string
-  locality?: string
-  town?: string
-  postalCode?: string
-  county?: string
-  country?: string
-  comment?: string
-  primary: boolean
-  noFixedAddress: boolean
-  startDate?: string
-  endDate?: string
-  phones: PrisonApiTelephone[]
-  addressUsages: PrisonApiAddressUsage[]
-}
-
-export interface PrisonApiTelephone {
-  number: string
-  type: string
-  ext?: string
-}
-
-export interface PrisonApiAddressUsage {
-  addressUsage?: string
-  addressUsageDescription?: string
-  activeFlag?: boolean
-}
-
-export interface PrisonApiEmail {
-  email: string
 }
 
 export default class NomisPrisonerService {
@@ -79,10 +24,10 @@ export default class NomisPrisonerService {
     return new RestClient('Nomis Prisoner API Client', config.apis.prisonApi, token)
   }
 
-  async getPrisonerContacts(context: Context, offenderNo: string): Promise<Contacts> {
+  async getPrisonerContacts(context: Context, offenderNo: string): Promise<PrisonApiContacts> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
     logger.debug(`getting contact details for ${offenderNo}`)
-    return NomisPrisonerService.restClient(token).get<Contacts>({
+    return NomisPrisonerService.restClient(token).get<PrisonApiContacts>({
       path: `/api/offenders/${offenderNo}/contacts`,
     })
   }

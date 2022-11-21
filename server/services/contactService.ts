@@ -1,9 +1,12 @@
 import { convertToTitleCase } from '../utils/utils'
 import type HmppsAuthClient from '../data/hmppsAuthClient'
-import NomisPrisonerService, { PrisonApiAddress, Context } from './nomisPrisonerService'
-import { getAddress, getAddressUsage, getPhone } from '../utils/addressHelpers'
-
-const NOT_ENTERED = 'Not entered'
+import NomisPrisonerService, {
+  Context,
+  PrisonApiAddress,
+  PrisonApiEmail,
+  PrisonApiTelephone,
+} from './nomisPrisonerService'
+import { getAddress, getAddressUsage, getEmail, getPhone } from '../utils/addressHelpers'
 
 interface UserDetails {
   name: string
@@ -26,6 +29,8 @@ interface ContactDto {
   restrictions?: RestrictionDto[]
   addresses: AddressDto[]
   commentText?: string
+  emails: PrisonApiEmail[]
+  phones: PrisonApiTelephone[]
 }
 
 interface RestrictionDto {
@@ -73,8 +78,6 @@ interface DisplayContact {
   phoneNumber: string
   email: string
   address: string
-  postcode: string
-  country: string
   landline: string
   addressType: string
 }
@@ -106,23 +109,29 @@ export default class ContactService {
             context,
             contact.personId,
           )
-          const rtn: ContactDto = {
+          const phones: PrisonApiTelephone[] = await this.nomisPrisonerService.getPrisonerPhones(
+            context,
+            contact.personId,
+          )
+          const emails: PrisonApiEmail[] = await this.nomisPrisonerService.getPrisonerEmails(context, contact.personId)
+          return {
             firstName: contact.firstName,
             lastName: contact.lastName,
             contactType: contact.contactType,
             contactTypeDescription: contact.contactTypeDescription,
-            relationshipCode: contact.relationship,
+            relationshipCode: contact.relationshipCode,
             relationshipDescription: contact.relationshipDescription,
             personId: contact.personId,
             addresses: addresses.map(address => ({
               ...address,
-              phones: [],
-              addressUsages: [],
+              phones: address.phones as TelephoneDto[],
+              addressUsages: address.addressUsages as AddressUsageDto[],
             })),
             approvedVisitor: false,
             emergencyContact: false,
+            emails,
+            phones,
           }
-          return rtn
         }),
     )
 
@@ -130,8 +139,6 @@ export default class ContactService {
       const a = addresses?.length && addresses[0]
       return {
         address: getAddress(a),
-        postcode: a?.postalCode || NOT_ENTERED,
-        country: a?.country || NOT_ENTERED,
         landline: getPhone(a?.phones),
         addressType: getAddressUsage(a),
       }
@@ -154,9 +161,9 @@ export default class ContactService {
       lastName: contact.lastName,
       contactTypeDescription: contact.contactTypeDescription,
       relationshipDescription: contact.relationshipDescription,
-      email: 'test@todo.com',
       ...toDisplayAddress(contact.addresses),
-      phoneNumber: '07888 123456',
+      email: getEmail(contact.emails),
+      phoneNumber: getPhone(contact.phones),
     }))
 
     return displayContacts
