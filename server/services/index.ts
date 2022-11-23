@@ -10,7 +10,7 @@ export const services = () => {
   const userService = new UserService(hmppsAuthClient)
   const nomisPrisonerService = new NomisPrisonerService(hmppsAuthClient)
   const prisonerSearchService = new PrisonerSearchService(hmppsAuthClient)
-  const contactService = new ContactService(hmppsAuthClient, nomisPrisonerService)
+  const contactService = new ContactService(nomisPrisonerService)
 
   return {
     userService,

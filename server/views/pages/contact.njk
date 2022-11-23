@@ -1,5 +1,7 @@
+{% set mainClasses = 'govuk-!-padding-top-0' %}
 {% extends "../partials/layout.njk" %}
 {% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
 {% set pageTitle = applicationName + " - Other personal contacts" %}
@@ -9,8 +11,14 @@
   {#  {{ govukBackLink({ text: "Back", href: '/' }) }} #}
 
   <div class="govuk-grid-row govuk-body">
-    <h1 class="govuk-heading-l">{{ name }}'s other personal contacts</h1>
-
+    <div class="govuk-grid-row profile-header govuk-!-margin-bottom-2">
+      <div class="govuk-grid-column-three-quarters">
+        <h1 class="govuk-heading-m govuk-!-margin-bottom-0">{{ name }}'s other personal contacts</h1>
+      </div>
+      <div class="govuk-grid-column-one-quarter">
+        <a class="float-right" href='#TODO'>Close</a>
+      </div>
+    </div>
     {% set cls = cycler("mid", "end") %}
     <div class="govuk-grid-row">
       {% for contact in displayContacts %}
@@ -18,8 +26,10 @@
       <div class="govuk-grid-column-one-half">
         <h2 class="govuk-heading-m govuk-!-margin-bottom-1">{{ contact.firstName }} {{ contact.lastName }}</h2>
         <p class="govuk-body-m govuk-!-margin-top-0">{{ contact.relationshipDescription }}</p>
+        {% if contact.phoneNumber %}
+          <p class="govuk-body-m govuk-!-margin-top-0">{{ contact.phoneNumber | safe }}</p>
+        {% endif %}
         {% set rows = [
-          { key: { text: "Phone number" },  value: { text: (contact.phoneNumber or NOT_ENTERED) | safe } },
           { key: { text: "Email" },         value: { text: (contact.email or NOT_ENTERED) | safe } },
           { key: { text: "Main address" },  value: { text: (contact.address or NOT_ENTERED) | safe } }
         ] %}
@@ -29,13 +39,14 @@
         {% if contact.addressType %}
           {% set rows = (rows.push({ key: { text: "Address type" },  value: { text: contact.addressType | safe } }), rows) %}
         {% endif %}
-        {{ govukSummaryList({
-          classes: '',
-          rows: rows
+        {{ govukDetails({
+          summaryText: "View details",
+          html: govukSummaryList({ rows: rows })
         }) }}
       </div>
       {% if cls.next() == "end" %}
     </div>
+    <hr />
     <div class="govuk-grid-row">
       {% endif %}
 

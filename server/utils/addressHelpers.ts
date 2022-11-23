@@ -1,5 +1,5 @@
 import { capitalize } from './utils'
-import { PrisonApiAddress, PrisonApiEmail, PrisonApiTelephone } from '../services/nomisPrisonerService'
+import { AddressDto, EmailDto, TelephoneDto } from '../services/nomisPrisonerService'
 
 // TODO should really get this from ref data
 const PHONES_TYPE = {
@@ -11,7 +11,7 @@ const PHONES_TYPE = {
   MOB: 'Mobile',
   VISIT: 'Agency Visit Line',
 }
-export const getPhone = (phones: PrisonApiTelephone[]) =>
+export const getPhone = (phones: TelephoneDto[]) =>
   phones &&
   phones
     .map(phone => {
@@ -21,17 +21,33 @@ export const getPhone = (phones: PrisonApiTelephone[]) =>
     })
     .join(',<br>')
 
-export const getEmail = (emails: PrisonApiEmail[]) => emails && emails.map(email => email.email).join(',<br>')
+export const getEmail = (emails: EmailDto[]) => emails && emails.map(email => email.email).join(',<br>')
 
-export const getAddress = (address: PrisonApiAddress) => {
+const addressSorter = (addr1: AddressDto, addr2: AddressDto): number => {
+  if (addr1 && addr2) {
+    if (addr1.primary && !addr2.primary) return -1
+    if (addr2.primary && !addr1.primary) return 1
+    return addr2.startDate.localeCompare(addr1.startDate) // compare ISOs as string, latest 1st
+  }
+  if (addr1) return -1
+  if (addr2) return 1
+  return 0
+}
+
+export const getAddress = (addresses: AddressDto[]) => {
+  if (!addresses) {
+    return ''
+  }
+  const address: AddressDto = addresses.sort(addressSorter)[0]
   if (!address) {
     return ''
   }
-  const flat = address.flat && `Flat ${address.flat}`
+  if (address.noFixedAddress) {
+    return 'No fixed address'
+  }
   return [
-    flat,
-    address.premise,
-    address.street,
+    address.flat && `Flat ${address.flat}`,
+    (address.premise || address.street) && `${address.premise} ${address.street}`,
     address.locality,
     address.town,
     address.county,
@@ -42,7 +58,7 @@ export const getAddress = (address: PrisonApiAddress) => {
     .join('<br>')
 }
 
-export const getAddressUsage = (address: PrisonApiAddress) => {
+export const getAddressUsage = (address: AddressDto) => {
   return address?.addressType && capitalize(address.addressType.replace(' Address', ''))
 }
 

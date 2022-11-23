@@ -1,9 +1,9 @@
 import RestClient from '../data/restClient'
 import config from '../config'
-import logger from '../../logger'
 import type HmppsAuthClient from '../data/hmppsAuthClient'
 
 import { components } from '../@types/nomisPrisonerImport'
+import { Context } from '../authentication/auth'
 
 export type PrisonApiContact = components['schemas']['OffenderContact']
 export type PrisonApiContacts = components['schemas']['OffenderContacts']
@@ -12,9 +12,69 @@ export type PrisonApiTelephone = components['schemas']['Telephone']
 export type PrisonApiAddressUsage = components['schemas']['AddressUsageDto']
 export type PrisonApiEmail = components['schemas']['Email']
 
-export interface Context {
-  username?: string
-  token?: string
+export interface EmailDto {
+  email: string
+}
+
+interface RestrictionDto {
+  restrictionType: string
+  restrictionTypeDescription: string
+  startDate: string
+  expiryDate?: string
+  // True if applied globally to the contact or False if applied in the context of a visit
+  globalRestriction: boolean
+  comment?: string
+}
+
+export interface TelephoneDto {
+  number: string
+  type: string
+  ext?: string
+}
+
+export interface AddressUsageDto {
+  addressUsage?: string
+  addressUsageDescription?: string
+  activeFlag: boolean
+}
+
+export interface AddressDto {
+  addressType?: string
+  flat?: string
+  premise?: string
+  street?: string
+  locality?: string
+  town?: string
+  postalCode?: string
+  county?: string
+  country?: string
+  comment?: string
+  primary: boolean
+  noFixedAddress: boolean
+  startDate?: string
+  endDate?: string
+  phones: TelephoneDto[]
+  addressUsages: AddressUsageDto[]
+}
+
+export interface ContactDto {
+  personId?: number
+  firstName?: string
+  middleName?: string
+  lastName?: string
+  dateOfBirth?: string
+  relationshipCode?: string
+  relationshipDescription?: string
+  contactType?: string
+  contactTypeDescription?: string
+  approvedVisitor: boolean
+  emergencyContact: boolean
+  nextOfKin?: boolean
+  restrictions?: RestrictionDto[]
+  addresses: AddressDto[]
+  commentText?: string
+  emails: EmailDto[]
+  phones: TelephoneDto[]
 }
 
 export default class NomisPrisonerService {
@@ -26,15 +86,14 @@ export default class NomisPrisonerService {
 
   async getPrisonerContacts(context: Context, offenderNo: string): Promise<PrisonApiContacts> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.debug(`getting contact details for ${offenderNo}`)
     return NomisPrisonerService.restClient(token).get<PrisonApiContacts>({
       path: `/api/offenders/${offenderNo}/contacts`,
+      query: 'activeOnly=true',
     })
   }
 
   async getPrisonerAddresses(context: Context, personId: number): Promise<PrisonApiAddress[]> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.debug(`getting address details for ${personId}`)
     return NomisPrisonerService.restClient(token).get<PrisonApiAddress[]>({
       path: `/api/persons/${personId}/addresses`,
     })
@@ -42,7 +101,6 @@ export default class NomisPrisonerService {
 
   async getPrisonerPhones(context: Context, personId: number): Promise<PrisonApiTelephone[]> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.debug(`getting phone details for ${personId}`)
     return NomisPrisonerService.restClient(token).get<PrisonApiTelephone[]>({
       path: `/api/persons/${personId}/phones`,
     })
@@ -50,7 +108,6 @@ export default class NomisPrisonerService {
 
   async getPrisonerEmails(context: Context, personId: number): Promise<PrisonApiEmail[]> {
     const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    logger.debug(`getting email details for ${personId}`)
     return NomisPrisonerService.restClient(token).get<PrisonApiEmail[]>({
       path: `/api/persons/${personId}/emails`,
     })
