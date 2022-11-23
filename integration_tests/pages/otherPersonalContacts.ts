@@ -1,8 +1,8 @@
 import Page, { PageElement } from './page'
 
-export default class IndexPage extends Page {
+export default class OtherPersonalContacts extends Page {
   constructor() {
-    super('This site is under construction...')
+    super(' other personal contacts')
   }
 
   courtRegisterLink = (): PageElement => cy.get('[href="/court-register"]')

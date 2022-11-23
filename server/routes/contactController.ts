@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import ContactService from '../services/contactService'
-import { Context } from '../services/nomisPrisonerService'
+import { Context } from '../authentication/auth'
 import PrisonerSearchService from '../services/prisonerSearchService'
 import { convertToTitleCase } from '../utils/utils'
 
