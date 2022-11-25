@@ -22,7 +22,7 @@ To start the main services excluding the example typescript template app:
 
 `docker-compose up --scale=app=0`
 
-Install dependencies using `npm install`, ensuring you are using >= `Node v14.x`
+Install dependencies using `npm install`, ensuring you are using >= `Node v18.x`
 
 And then, to build the assets and start the app with nodemon:
 
@@ -67,3 +67,5 @@ Commands to generate types from the apis:
 `npx openapi-typescript https://api-dev.prison.service.justice.gov.uk/v3/api-docs --output server/@types/nomisPrisonerImport/index.d.ts`
 
 `npx openapi-typescript https://prisoner-offender-search-dev.prison.service.justice.gov.uk/v3/api-docs --output server/@types/prisonerSearchImport/index.d.ts`
+
+`npx openapi-typescript https://prisoner-contact-registry-dev.prison.service.justice.gov.uk/v3/api-docs --output server/@types/prisonerContactRegistry/index.d.ts`

@@ -19,7 +19,7 @@ const stubGetPrisonerContacts = ({ offenderNo, response }: { offenderNo: string;
   stubFor({
     request: {
       method: 'GET',
-      url: `/api/offenders/${offenderNo}/contacts?activeOnly=true`,
+      url: `/api/offenders/${offenderNo}/contacts`,
     },
     response: {
       status: 200,

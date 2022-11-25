@@ -662,6 +662,18 @@ export interface paths {
     /** Can be filtered by participation type and incident type */
     get: operations['getIncidentsByOffenderNo']
   }
+  '/api/offenders/{offenderNo}/housing-location': {
+    /**
+     * <p>Housing location split out into different levels for a prisoner, or an empty response if the prisoner is not currently in a prison.</p>
+     * <p>There will be either 3 or 4 levels returned depending on the layout in NOMIS.
+     * Level 1 is the top level, so normally a wing or a house block and level 3 / 4 will be the individual cell.</p>
+     * <p>This endpoint returns the prison levels as recorded in NOMIS and may not accurately reflect the physical layout of the prison.
+     * For example Bristol has wings, spurs and landings, but this endpoint will only return wings and landings as spurs are not mapped in NOMIS.
+     * Another example is Moorland where 5-1-B-014 in NOMIS is Wing 5, Landing 1, Cell B and Cell 014, whereas in reality it should be Houseblock 5, Spur 1, Wing B and Cell 014 instead.
+     * This endpoint will therefore also return different information from Whereabouts API as that service re-maps the NOMIS layout to include spurs etc.</p>
+     */
+    get: operations['getHousingLocation']
+  }
   '/api/offenders/{offenderNo}/events': {
     /** All scheduled events for offender. */
     get: operations['getEvents']
@@ -4333,6 +4345,12 @@ export interface components {
       topupSupervisionExpiryDate?: string
       /**
        * Format: date
+       * @description ERSED - Early Removal Scheme Eligibility Date
+       * @example 2020-02-03
+       */
+      earlyRemovalSchemeEligibilityDate?: string
+      /**
+       * Format: date
        * @description Effective sentence end date.
        * @example 2020-02-03
        */
@@ -6502,10 +6520,10 @@ export interface components {
       establishmentName: string
     }
     PagePrisonerInformation: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['PrisonerInformation'][]
@@ -6513,10 +6531,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     PageableObject: {
@@ -7191,6 +7209,33 @@ export interface components {
        */
       recordStaffId?: number
     }
+    HousingLocation: {
+      /**
+       * Format: int32
+       * @description The level (starting from 1) of the individual location. The highest number level will be the cell.
+       * @example 1
+       */
+      level: number
+      /**
+       * @description The code for the location e.g. 010 for a cell, A for a wing
+       * @example 010
+       */
+      code: string
+      /**
+       * @description The type of the location - from LIVING_UNIT reference code
+       * @example WING
+       * @enum {string}
+       */
+      type?: 'BED' | 'BLK' | 'CB' | 'CELL' | 'LAND' | 'SPUR' | 'TIER' | 'WING'
+      /**
+       * @description Description of the location, either from the user description if set or reference code description and code
+       * @example Wing A
+       */
+      description: string
+    }
+    OffenderLocation: {
+      levels?: components['schemas']['HousingLocation'][]
+    }
     /** @description Damage obligation for an offender */
     OffenderDamageObligationModel: {
       /**
@@ -7332,6 +7377,8 @@ export interface components {
       bookingId: number
       /** @description List of emails associated with the contact */
       emails?: components['schemas']['Email'][]
+      /** @description List of phone numbers associated with the contact */
+      phones?: components['schemas']['Telephone'][]
       /** @description List of restrictions associated with the contact */
       restrictions?: components['schemas']['VisitorRestriction'][]
       /**
@@ -8644,10 +8691,10 @@ export interface components {
       additionalAnswers?: string[]
     }
     PageOffenceDto: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['OffenceDto'][]
@@ -8655,10 +8702,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     Pageable: {
@@ -9336,10 +9383,10 @@ export interface components {
       numberAllocated: number
     }
     PageOffenderNumber: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['OffenderNumber'][]
@@ -9347,10 +9394,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Offender Event */
@@ -9557,10 +9604,10 @@ export interface components {
       addresses: components['schemas']['AddressDto'][]
     }
     PageEmployment: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['Employment'][]
@@ -9568,10 +9615,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Offender Education */
@@ -9639,10 +9686,10 @@ export interface components {
       addresses: components['schemas']['AddressDto'][]
     }
     PageEducation: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['Education'][]
@@ -9650,10 +9697,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Bed assignment history entry */
@@ -9825,10 +9872,10 @@ export interface components {
       hasVisits: boolean
     }
     PageVisitWithVisitors: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['VisitWithVisitors'][]
@@ -9836,10 +9883,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Visit details */
@@ -10052,10 +10099,10 @@ export interface components {
       otherContacts: components['schemas']['Contact'][]
     }
     PageBedAssignment: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['BedAssignment'][]
@@ -10063,17 +10110,17 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     PageCaseNote: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['CaseNote'][]
@@ -10081,10 +10128,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Case Note Count Detail */
@@ -10128,10 +10175,10 @@ export interface components {
       currency: string
     }
     PageAlert: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['Alert'][]
@@ -10139,10 +10186,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Adjudication Summary for offender */
@@ -10206,10 +10253,10 @@ export interface components {
       hearingSequence: number
     }
     PagePrisonerBookingSummary: {
-      /** Format: int32 */
-      totalPages?: number
       /** Format: int64 */
       totalElements?: number
+      /** Format: int32 */
+      totalPages?: number
       /** Format: int32 */
       size?: number
       content?: components['schemas']['PrisonerBookingSummary'][]
@@ -10217,10 +10264,10 @@ export interface components {
       number?: number
       sort?: components['schemas']['SortObject']
       first?: boolean
-      last?: boolean
       /** Format: int32 */
       numberOfElements?: number
       pageable?: components['schemas']['PageableObject']
+      last?: boolean
       empty?: boolean
     }
     /** @description Prisoner Booking Summary */
@@ -16850,6 +16897,49 @@ export interface operations {
       200: {
         content: {
           'application/json': components['schemas']['IncidentCase'][]
+        }
+      }
+      /** Invalid request. */
+      400: {
+        content: {
+          'application/json': components['schemas']['ErrorResponse']
+        }
+      }
+      /** Requested resource not found. */
+      404: {
+        content: {
+          'application/json': components['schemas']['ErrorResponse']
+        }
+      }
+      /** Unrecoverable error occurred whilst processing request. */
+      500: {
+        content: {
+          'application/json': components['schemas']['ErrorResponse']
+        }
+      }
+    }
+  }
+  /**
+   * <p>Housing location split out into different levels for a prisoner, or an empty response if the prisoner is not currently in a prison.</p>
+   * <p>There will be either 3 or 4 levels returned depending on the layout in NOMIS.
+   * Level 1 is the top level, so normally a wing or a house block and level 3 / 4 will be the individual cell.</p>
+   * <p>This endpoint returns the prison levels as recorded in NOMIS and may not accurately reflect the physical layout of the prison.
+   * For example Bristol has wings, spurs and landings, but this endpoint will only return wings and landings as spurs are not mapped in NOMIS.
+   * Another example is Moorland where 5-1-B-014 in NOMIS is Wing 5, Landing 1, Cell B and Cell 014, whereas in reality it should be Houseblock 5, Spur 1, Wing B and Cell 014 instead.
+   * This endpoint will therefore also return different information from Whereabouts API as that service re-maps the NOMIS layout to include spurs etc.</p>
+   */
+  getHousingLocation: {
+    parameters: {
+      path: {
+        /** Offender No */
+        offenderNo: string
+      }
+    }
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          'application/json': components['schemas']['OffenderLocation']
         }
       }
       /** Invalid request. */

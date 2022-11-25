@@ -2,7 +2,7 @@
 import nunjucks from 'nunjucks'
 import express from 'express'
 import * as pathModule from 'path'
-import { initialiseName } from './utils'
+import { initialiseName, possessive } from './utils'
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -39,4 +39,11 @@ export default function nunjucksSetup(app: express.Express, path: pathModule.Pla
   )
 
   njkEnv.addFilter('initialiseName', initialiseName)
+
+  njkEnv.addFilter('setAttribute', (dictionary, key, value) => {
+    dictionary[key] = value
+    return dictionary
+  })
+
+  njkEnv.addFilter('possessive', possessive)
 }

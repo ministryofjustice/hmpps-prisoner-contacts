@@ -1,10 +1,9 @@
 import NomisPrisonerService, {
-  AddressUsageDto,
+  AddressDto,
   ContactDto,
   EmailDto,
   PrisonApiAddress,
   PrisonApiContacts,
-  PrisonApiTelephone,
   TelephoneDto,
 } from './nomisPrisonerService'
 import { getAddress, getAddressUsage, getEmail, getPhone } from '../utils/addressHelpers'
@@ -40,11 +39,6 @@ export default class ContactService {
             context,
             contact.personId,
           )
-          const phones: PrisonApiTelephone[] = await this.nomisPrisonerService.getPrisonerPhones(
-            context,
-            contact.personId,
-          )
-          // const emails: PrisonApiEmail[] = await this.nomisPrisonerService.getPrisonerEmails(context, contact.personId)
           return {
             firstName: contact.firstName,
             lastName: contact.lastName,
@@ -53,15 +47,19 @@ export default class ContactService {
             relationshipCode: contact.relationshipCode,
             relationshipDescription: contact.relationshipDescription,
             personId: contact.personId,
-            addresses: addresses.map(address => ({
-              ...address,
-              phones: address.phones as TelephoneDto[],
-              addressUsages: address.addressUsages as AddressUsageDto[],
-            })),
-            approvedVisitor: false,
-            emergencyContact: false,
+            addresses: addresses as AddressDto[],
+            //  TODO may need a mapping at some point
+            //   addresses.map(address => ({
+            //   ...address,
+            //   phones: address.phones as TelephoneDto[],
+            //   addressUsages: address.addressUsages as AddressUsageDto[],
+            // })),
+            nextOfKin: contact.nextOfKin,
+            restrictions: contact.restrictions,
+            approvedVisitor: contact.approvedVisitor,
+            emergencyContact: contact.emergencyContact,
             emails: contact.emails as EmailDto[],
-            phones: phones as TelephoneDto[],
+            phones: contact.phones as TelephoneDto[],
           }
         }),
     )
