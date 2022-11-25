@@ -13,7 +13,7 @@
   <div class="govuk-grid-row govuk-body">
     <div class="govuk-grid-row profile-header govuk-!-margin-bottom-2">
       <div class="govuk-grid-column-three-quarters">
-        <h1 class="govuk-heading-m govuk-!-margin-bottom-0">{{ name }}'s other personal contacts</h1>
+        <h1 class="govuk-heading-m govuk-!-margin-bottom-0">{{ name | possessive }} other personal contacts</h1>
       </div>
       <div class="govuk-grid-column-one-quarter">
         <a class="float-right" href='#TODO'>Close</a>
@@ -39,12 +39,14 @@
         {% if contact.addressType %}
           {% set rows = (rows.push({ key: { text: "Address type" },  value: { text: contact.addressType | safe } }), rows) %}
         {% endif %}
-        {{ govukDetails({
-          summaryText: "View details",
-          html: govukSummaryList({ rows: rows })
-        }) }}
+
+        {# Omit line below last row of contact details#}
+        {% set rows = (rows | last | setAttribute('classes', "govuk-summary-list__row--no-border"), rows) %}
+
+        {{ govukSummaryList({ rows: rows }) }}
       </div>
-      {% if cls.next() == "end" %}
+      {# Omit line below last contact #}
+      {% if cls.next() == "end" and not loop.last %}
     </div>
     <hr />
     <div class="govuk-grid-row">

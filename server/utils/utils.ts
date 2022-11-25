@@ -27,3 +27,9 @@ export const capitalize = (string: string): string => {
   const lowerCase = string.toLowerCase()
   return lowerCase.charAt(0).toUpperCase() + lowerCase.slice(1)
 }
+
+export const possessive = (string: string): string => {
+  if (!string) return ''
+
+  return `${string}${string.toLowerCase().endsWith('s') ? '’' : '’s'}`
+}

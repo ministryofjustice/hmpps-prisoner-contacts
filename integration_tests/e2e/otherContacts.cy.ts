@@ -1,5 +1,5 @@
 import Page from '../pages/page'
-import IndexPage from '../pages'
+import IndexPage from '../pages/index'
 import OtherPersonalContacts from '../pages/otherPersonalContacts'
 import { Prisoner } from '../../server/services/prisonerSearchService'
 import {
@@ -48,6 +48,7 @@ const defaultContact: PrisonApiContact = {
   approvedVisitor: true,
   bookingId: 123,
   emails: contactEmails,
+  phones: contactPhones,
 }
 
 context('Other contacts', () => {
@@ -69,8 +70,6 @@ context('Other contacts', () => {
       cy.task('stubGetPrisoner', prisonerData)
       cy.task('stubGetPrisonerContacts', { offenderNo: 'A1234AA', response: { offenderContacts: [defaultContact] } })
       cy.task('stubGetPrisonerAddresses', { personId: 112, response: addresses1 })
-      cy.task('stubGetPrisonerPhones', { personId: 112, response: contactPhones })
-      // cy.task('stubGetPrisonerEmails', { personId: 112, response: addressEmails })
       cy.signIn()
       Page.verifyOnPage(IndexPage)
 
@@ -82,8 +81,7 @@ context('Other contacts', () => {
       cy.contains('Mobile 07711333444')
       cy.contains('Business 011333444 extension number 777')
 
-      cy.contains('View details').click()
-      cy.get('details').within(() => {
+      cy.get('dl').within(() => {
         cy.contains('email@thecontact.com')
         cy.contains('Flat A')
         cy.contains('13 High Street')
