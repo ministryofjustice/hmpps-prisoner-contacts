@@ -119,7 +119,7 @@ describe('Contact service', () => {
 
       expect(result).toEqual([
         {
-          address: 'Flat A<br>13 High Street<br>Ulverston<br>West Yorkshire<br>LS1 AAA<br>England',
+          address: 'Flat A<br>13<br>High Street<br>Ulverston<br>West Yorkshire<br>LS1 AAA<br>England',
           addressType: 'Home',
           contactTypeDescription: 'Social',
           email: 'email@addressgoeshere.com',
@@ -139,7 +139,7 @@ describe('Contact service', () => {
       expect(result).toHaveLength(0)
     })
 
-    it('Sorts contacts by name and addresses by primary', async () => {
+    it('Sorts contacts by name', async () => {
       const nonPrimary: PrisonApiAddress = {
         locality: 'Non-primary',
         primary: false,
@@ -182,40 +182,6 @@ describe('Contact service', () => {
       expect(result[2].lastName).toEqual('SMITH')
 
       expect(result[0].address).toEqual('Primary')
-    })
-
-    it('Sorts addresses by start date', async () => {
-      const addr1: PrisonApiAddress = {
-        locality: 'Older',
-        primary: false,
-        noFixedAddress: false,
-        startDate: '2022-10-01',
-      }
-      const addr2: PrisonApiAddress = {
-        locality: 'Newer',
-        primary: false,
-        noFixedAddress: false,
-        startDate: '2022-11-01',
-      }
-      nomisPrisonerService.getPrisonerContacts.mockResolvedValue({ offenderContacts: [defaultContact] })
-      nomisPrisonerService.getPrisonerAddresses.mockResolvedValue([addr1, addr2])
-
-      const result = await contactService.assembleContacts(context, 'A1234AA')
-
-      expect(result[0].address).toEqual('Newer')
-    })
-
-    it('No fixed address', async () => {
-      const addr1: PrisonApiAddress = {
-        primary: false,
-        noFixedAddress: true,
-      }
-      nomisPrisonerService.getPrisonerContacts.mockResolvedValue({ offenderContacts: [defaultContact] })
-      nomisPrisonerService.getPrisonerAddresses.mockResolvedValue([addr1])
-
-      const result = await contactService.assembleContacts(context, 'A1234AA')
-
-      expect(result[0].address).toEqual('No fixed address')
     })
 
     it('Propagates error', async () => {
