@@ -84,7 +84,8 @@ context('Other contacts', () => {
       cy.get('dl').within(() => {
         cy.contains('email@thecontact.com')
         cy.contains('Flat A')
-        cy.contains('13 High Street')
+        cy.contains('13')
+        cy.contains('High Street')
         cy.contains('Ulverston')
         cy.contains('West Yorkshire')
         cy.contains('LS1 AAA')
