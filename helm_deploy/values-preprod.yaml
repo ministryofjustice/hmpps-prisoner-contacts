@@ -2,10 +2,8 @@
 # Per environment values which override defaults in hmpps-prisoner-contacts/values.yaml
 
 generic-service:
-  replicaCount: 4
-
   ingress:
-    host: prisoner-contacts-preprod.hmpps.service.justice.gov.uk
+    host: prisoner-contacts-preprod.prison.service.justice.gov.uk
 
   env:
     INGRESS_URL: "https://prisoner-contacts-preprod.prison.service.justice.gov.uk"
