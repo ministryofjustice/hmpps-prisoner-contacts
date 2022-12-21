@@ -35,29 +35,25 @@ export default class NomisPrisonerService {
   }
 
   async getPrisonerContacts(context: Context, offenderNo: string): Promise<PrisonApiContacts> {
-    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    return NomisPrisonerService.restClient(token).get<PrisonApiContacts>({
-      path: `/api/offenders/${offenderNo}/contacts`,
+    return NomisPrisonerService.restClient(context.token).get<PrisonApiContacts>({
+      path: `/api/offenders/${offenderNo}/contacts`, // called with OFFENDER_CONTACTS,   PRISONER_SEARCH (OFFENDER_CONTACTS overrides but NOT a user role!)
     })
   }
 
   async getPrisonerAddresses(context: Context, personId: number): Promise<PrisonApiAddress[]> {
-    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    return NomisPrisonerService.restClient(token).get<PrisonApiAddress[]>({
+    return NomisPrisonerService.restClient(context.token).get<PrisonApiAddress[]>({
       path: `/api/persons/${personId}/addresses`,
     })
   }
 
   async getPrisonerPhones(context: Context, personId: number): Promise<PrisonApiTelephone[]> {
-    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    return NomisPrisonerService.restClient(token).get<PrisonApiTelephone[]>({
+    return NomisPrisonerService.restClient(context.token).get<PrisonApiTelephone[]>({
       path: `/api/persons/${personId}/phones`,
     })
   }
 
   async getPrisonerEmails(context: Context, personId: number): Promise<PrisonApiEmail[]> {
-    const token = await this.hmppsAuthClient.getSystemClientToken(context.username)
-    return NomisPrisonerService.restClient(token).get<PrisonApiEmail[]>({
+    return NomisPrisonerService.restClient(context.token).get<PrisonApiEmail[]>({
       path: `/api/persons/${personId}/emails`,
     })
   }

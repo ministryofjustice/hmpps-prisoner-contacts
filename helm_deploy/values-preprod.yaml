@@ -2,6 +2,8 @@
 # Per environment values which override defaults in hmpps-prisoner-contacts/values.yaml
 
 generic-service:
+  replicaCount: 0 # Leave this until the security question over visibility of contact data is decided
+
   ingress:
     host: prisoner-contacts-preprod.prison.service.justice.gov.uk
 
