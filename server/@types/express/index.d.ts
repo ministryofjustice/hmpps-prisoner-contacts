@@ -20,11 +20,6 @@ export declare global {
       verified?: boolean
       id: string
       logout(done: (err: unknown) => void): void
-      session: {
-        returnTo: string
-        nowInMinutes: number
-        destroy(done: (err: unknown) => void): void
-      }
     }
   }
 }
